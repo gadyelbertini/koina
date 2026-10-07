@@ -41,53 +41,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 )
 public class UsuarioController {
 
-	private final UsuarioServiceImpl usuarioService;
+	private final UsuarioServiceImpl usuarioServiceImpl;
 
-	@Operation(
-		summary = "Lista usuários",
-		description = "Retorna uma lista paginada de usuários. "
-                    + "Permite filtrar por nome parcial e papel."
-	)
-	@ApiResponses({
-		@ApiResponse(
-			responseCode = "200",
-			description = "Usuários encotrados"
-		),
-		@ApiResponse(
-			responseCode = "400",
-			description = "Parâmetros inválidos"
-		)
-	})
-	@GetMapping
-	public ResponseEntity<Page<UsuarioResponseDTO>> listarUsuarios(
-			@RequestParam(required = false) String nome,
-			@RequestParam(required = false) TipoPapel tipoPapel,
-			@PageableDefault(size = 10) Pageable pageable) {
-		return ResponseEntity.ok(usuarioService.listarUsuarios(nome, tipoPapel, pageable));
-	}
-	
-	@Operation(
-        summary = "Busca usuário por ID",
-        description = "Retorna os dados de um usuário pelo seu identificador."
-    )
-    @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "Usuário encontrado"
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Usuário não encontrado"
-        )
-    })
-	@GetMapping("/{idUsuario}")
-	public ResponseEntity<UsuarioResponseDTO> buscarPorId(
-		@PathVariable("idUsuario") String idUsuario) {
-		return ResponseEntity.ok(usuarioService.buscarPorId(idUsuario));
-	}
-	
-
-	@Operation(
+    @Operation(
         summary = "Cria um usuáro anonimo",
         description = "Cadastra um novo usuário anonimo."
     )
@@ -103,7 +59,7 @@ public class UsuarioController {
     })
 	@PostMapping("/anonimos")
 	public ResponseEntity<UsuarioAnonimoResponseDTO> criarUsuarioAnonimo(@Valid @RequestBody UsuarioAnonimoRequestDTO dto) {
-		UsuarioAnonimoResponseDTO usuarioAnonimo = usuarioService.criarUsuarioAnonimo(dto);
+		UsuarioAnonimoResponseDTO usuarioAnonimo = usuarioServiceImpl.criarUsuarioAnonimo(dto);
 
 		URI location = URI.create("/api/v1/usuarios/anonimos/" + usuarioAnonimo.id());
 
@@ -126,13 +82,57 @@ public class UsuarioController {
     })
 	@PostMapping("/cadastrados")
 	public ResponseEntity<UsuarioCadastradoResponseDTO> criarUsuarioCadastrado(@RequestBody UsuarioCadastradoRequestDTO dto) {
-		UsuarioCadastradoResponseDTO usuarioCadastrado = usuarioService.criarUsuarioCadastrado(dto);
+		UsuarioCadastradoResponseDTO usuarioCadastrado = usuarioServiceImpl.criarUsuarioCadastrado(dto);
 
 		URI location = URI.create("/api/v1/usuarios/cadastrados/" + usuarioCadastrado.id());
 
 		return ResponseEntity.created(location).body(usuarioCadastrado);
 	}
 
+    @Operation(
+        summary = "Busca usuário por ID",
+        description = "Retorna os dados de um usuário pelo seu identificador."
+    )
+    @ApiResponses({
+        @ApiResponse(
+            responseCode = "200",
+            description = "Usuário encontrado"
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Usuário não encontrado"
+        )
+    })
+	@GetMapping("/{idUsuario}")
+	public ResponseEntity<UsuarioResponseDTO> buscarPorId(
+		@PathVariable("idUsuario") String idUsuario) {
+		return ResponseEntity.ok(usuarioServiceImpl.buscarPorId(idUsuario));
+	}
+
+	@Operation(
+		summary = "Lista usuários",
+		description = "Retorna uma lista paginada de usuários. "
+                    + "Permite filtrar por nome parcial e papel."
+	)
+	@ApiResponses({
+		@ApiResponse(
+			responseCode = "200",
+			description = "Usuários encotrados"
+		),
+		@ApiResponse(
+			responseCode = "400",
+			description = "Parâmetros inválidos"
+		)
+	})
+	@GetMapping
+	public ResponseEntity<Page<UsuarioResponseDTO>> listarUsuarios(
+			@RequestParam(required = false) String nome,
+			@RequestParam(required = false) TipoPapel tipoPapel,
+			@PageableDefault(size = 10) Pageable pageable) {
+		return ResponseEntity.ok(usuarioServiceImpl.listarUsuarios(nome, tipoPapel, pageable));
+	}
+	
+		
 	@Operation(
         summary = "Atualiza um usuário",
         description = "Atualização total dos dados de um usuário."
@@ -153,10 +153,6 @@ public class UsuarioController {
         @ApiResponse(
             responseCode = "409",
             description = "Usuário com e-mail já cadastrado"
-        ),
-        @ApiResponse(
-            responseCode = "422",
-            description = "Estoque inválido"
         )
     })
     @PutMapping("/{idUsuario}")
@@ -164,29 +160,29 @@ public class UsuarioController {
             @PathVariable("idUsuario") String idUsuario,
             @Valid @RequestBody UsuarioCadastradoRequestDTO dto) {
 
-        return ResponseEntity.ok(usuarioService.atualizarUsuarioCadastrado(idUsuario, dto));
+        return ResponseEntity.ok(usuarioServiceImpl.atualizarUsuarioCadastrado(idUsuario, dto));
     }
 
 	@Operation(
-        summary = "Remove um produto",
-        description = "Exclui um produto pelo seu identificador."
+        summary = "Remove um usuário",
+        description = "Exclui um usuário pelo seu identificador."
     )
     @ApiResponses({
         @ApiResponse(
             responseCode = "204",
-            description = "Produto removido com sucesso"
+            description = "Usuário removido com sucesso"
         ),
         @ApiResponse(
             responseCode = "404",
-            description = "Produto não encontrado"
+            description = "Usuário não encontrado"
         )
     })
     @DeleteMapping("/{idUsuario}")
     public ResponseEntity<UsuarioResponseDTO> deletar(
             @PathVariable("idUsuario") String idUsuario) {
 
-        usuarioService.deletar(idUsuario);
+        usuarioServiceImpl.deletar(idUsuario);
 
-        return ResponseEntity.ok(usuarioService.deletar(idUsuario));
+        return ResponseEntity.ok(usuarioServiceImpl.deletar(idUsuario));
     }
 }

@@ -1,6 +1,6 @@
-// package com.example.koina.atendimento.dto;
+package com.example.koina.atendimento.dto;
 
-// public record AtendimentoRequestDTO(
-// 	String idAcatante,
-// 	String descricao
-// ) {}
+public record AtendimentoRequestDTO(
+	String idAcatante,
+	String descricao
+) {}

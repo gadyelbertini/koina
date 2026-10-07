@@ -47,6 +47,11 @@ public class UsuarioServiceImpl implements UsuarioService{
 	}
 
 	@Override
+	public Usuario buscarPorIdUsuario(String id){
+		return usuarioRepository.findById(id).orElseThrow(() -> new UsuarioNaoEncontradoException(id));
+	}
+
+	@Override
 	public UsuarioAnonimoResponseDTO criarUsuarioAnonimo(UsuarioAnonimoRequestDTO dto){
 		Usuario usuario = Usuario.builder().apelido(dto.apelido()).tipoPapel(TipoPapel.ANONIOM).build();
 		
@@ -76,8 +81,6 @@ public class UsuarioServiceImpl implements UsuarioService{
 		usuario.setNome(dto.nome());
 		usuario.setEmail(dto.email());
 		usuario.setSenhaHash(dto.senha());
-
-		usuarioRepository.save(usuario);
 
 		return toCadastradoResponse(usuarioRepository.save(usuario));
 	}

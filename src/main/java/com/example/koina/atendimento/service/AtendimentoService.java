@@ -1,50 +1,23 @@
-// package com.example.koina.atendimento.service;
+package com.example.koina.atendimento.service;
 
-// import org.springframework.stereotype.Service;
 
-// import com.example.koina.atendimento.dto.AtendimentoRequestDTO;
-// import com.example.koina.atendimento.dto.AtendimentoResponseDTO;
-// import com.example.koina.atendimento.model.entity.Atendimento;
-// import com.example.koina.atendimento.repository.AtendimentoRepository;
-// import com.example.koina.usuario.model.entity.Usuario;
-// import com.example.koina.usuario.repository.UsuarioRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-// import lombok.RequiredArgsConstructor;
 
-// @Service
-// @RequiredArgsConstructor
-// public class AtendimentoService {
-	
-// 	private final AtendimentoRepository atendimentoRepository;
-// 	private final UsuarioRepository usuarioRepository;
+import com.example.koina.atendimento.dto.AtendimentoRequestDTO;
+import com.example.koina.atendimento.dto.AtendimentoResponseDTO;
+import com.example.koina.atendimento.model.enums.StatusAtendimento;
 
-// 	public class UsuarioNaoEncontradoException extends RuntimeException {
-// 		public UsuarioNaoEncontradoException(String id) {
-// 			super("Usuário não encontrado: " + id);
-// 		}
-// 	}
+public interface AtendimentoService {
 
-// 	public AtendimentoResponseDTO abrirAtendimento(AtendimentoRequestDTO dto){
-// 		Usuario usuario = usuarioRepository.findById(dto.idAcatante()).orElseThrow(() -> new UsuarioNaoEncontradoException(dto.idAcatante()));
+	Page<AtendimentoResponseDTO> listarAtendimento(String descricao, StatusAtendimento statusAtendimento, Pageable pageable);
 
-// 		if (usuario.getStatusUsuario() == true) {
-// 			Atendimento atendimento = new Atendimento();
-// 			atendimento.setAcatante(usuario);
-// 			atendimento.setDescricao(dto.descricao());
+	AtendimentoResponseDTO buscarPorId(String id);
 
-// 			atendimentoRepository.save(atendimento);
+	AtendimentoResponseDTO criar(AtendimentoRequestDTO dto);
 
-// 			return new AtendimentoResponseDTO(
-// 				atendimento.getIdAtendimento(),
-// 				atendimento.getAcatante(),
-// 				atendimento.getVoluntario(),
-// 				atendimento.getDescricao(),
-// 				atendimento.getDataHoraSolicitacaoAtendimento(),
-// 				atendimento.getStatusAtendimento()
-// 			);
-// 		} else {
-// 			throw new IllegalStateException("Usuário desativado.");
-// 		}
-// 	}
+	AtendimentoResponseDTO aceitar(String idAtendimento, String idVoluntario);
 
-// }
+	AtendimentoResponseDTO cancelar(String id);
+}
