@@ -1,6 +1,7 @@
 package com.example.koina.atendimento.controller;
 
 import java.net.URI;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,7 +40,6 @@ public class AtendimentoController {
 
 	private final AtendimentoServiceImpl atendimentoServiceImpl;
 
-	
     @Operation(
         summary = "Cria um atendimento",
         description = "Cadastra um novo atendimento."
@@ -100,10 +100,11 @@ public class AtendimentoController {
 	})
 	@GetMapping
 	public ResponseEntity<Page<AtendimentoResponseDTO>> listarAtendimento(
-			@RequestParam(required = false) String descricao,
+			@RequestParam(required = false) String texto,
+            @RequestParam(required = false) List<String> campos,
 			@RequestParam(required = false) StatusAtendimento statusAtendimento,
 			@PageableDefault(size = 10) Pageable pageable) {
-		return ResponseEntity.ok(atendimentoServiceImpl.listarAtendimento(descricao, statusAtendimento, pageable));
+		return ResponseEntity.ok(atendimentoServiceImpl.listarAtendimento(texto, campos, statusAtendimento, pageable));
 	}
 
 	@Operation(
