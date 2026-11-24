@@ -2,6 +2,7 @@ package com.example.koina.usuario.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.example.koina.exception.UsuarioEmailDuplicadoException;
@@ -25,20 +26,27 @@ public class UsuarioServiceImpl implements UsuarioService{
 
 	@Override
 	public Page<UsuarioResponseDTO> listarUsuarios(String nome, TipoPapel tipoPapel, Pageable pageable){
-		boolean temNome = nome != null && !nome.isBlank();
-		Page<Usuario> usuario;
 
-		if (temNome && tipoPapel != null) {
-			usuario = usuarioRepository.findByTipoPapelAndNomeContainingIgnoreCaseOrTipoPapelAndApelidoContainingIgnoreCase(tipoPapel, nome.trim(), tipoPapel, nome.trim(), pageable);
-		} else if (temNome) {
-			usuario = usuarioRepository.findByNomeContainingIgnoreCaseOrApelidoContainingIgnoreCase(nome.trim(), nome.trim(), pageable);
-		} else if (tipoPapel != null) {
-			usuario = usuarioRepository.findByTipoPapel(tipoPapel, pageable);
-		} else {
-			usuario = usuarioRepository.findAll(pageable);
+		Specification<Usuario> spec = Specification.unrestricted();
+
+		if(nome != null && !nome.isBlank()){
+			String filter = "%" + nome.trim().toLowerCase() + "%";
+
+			spec = spec.and((root, query, cb) -> 
+				cb.or(
+					cb.like(cb.lower(root.get("nome")), filter),
+					cb.like(cb.lower(root.get("apelido")), filter)
+				)
+			);
 		}
 
-		return usuario.map(this::toResponseDTO);
+		if (tipoPapel != null) {
+			spec = spec.and((root, query, cb) ->
+				cb.equal(root.get("tipoPapel"), tipoPapel)
+			);
+		}
+
+		return usuarioRepository.findAll(spec, pageable).map(this::toResponseDTO);
 	};
 
 	@Override

@@ -8,9 +8,11 @@ import com.example.koina.usuario.model.enums.TipoPapel;
 import com.example.koina.usuario.service.UsuarioServiceImpl;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.example.koina.atendimento.dto.AtendimentoRequestDTO;
@@ -28,28 +30,60 @@ public class AtendimentoServiceImpl implements AtendimentoService{
 	private final AtendimentoRepository atendimentoRepository;
 
 	@Override
-	public Page<AtendimentoResponseDTO> listarAtendimento(String descricao, StatusAtendimento statusAtendimento, Pageable pageable){
-		boolean temDescricao = descricao != null && !descricao.isBlank();
+	public Page<AtendimentoResponseDTO> listarAtendimento(String texto, List<String> campos, StatusAtendimento statusAtendimento, Pageable pageable){
 
-		Page<Atendimento> atendimento;
 
-		if (temDescricao && statusAtendimento != null) {
-			atendimento = atendimentoRepository.findByDescricaoContainingIgnoreCaseAndStatusAtendimento(descricao.trim(), statusAtendimento, pageable);
-		} else if (temDescricao) {
-			atendimento = atendimentoRepository.findByDescricaoContainingIgnoreCase(descricao.trim(), pageable);
-		} else if (statusAtendimento != null) {
-			atendimento = atendimentoRepository.findByStatusAtendimento(statusAtendimento, pageable);
-		} else {
-			atendimento = atendimentoRepository.findAll(pageable);
+		Specification<Atendimento> spec = Specification.unrestricted();
+
+		if (statusAtendimento != null) {
+			spec = spec.and((root, query, cb) ->
+				cb.equal(root.get("statusAtendimento"), statusAtendimento)
+			);
 		}
 
-		return atendimento.map(this::toResponseDTO);
+		if (texto != null && !texto.isBlank()) {
+			String filter = "%" + texto.trim().toLowerCase() + "%";
+
+			Specification<Atendimento> textoSpec = null;
+
+			if (campos.contains("descricao")) {
+				Specification<Atendimento> descricaoSpec = (root, query, cb) -> 
+					cb.like(cb.lower(root.get("descricao")), filter);
+
+				textoSpec = textoSpec == null?descricaoSpec:textoSpec.or(descricaoSpec);
+			}
+
+			if (campos.contains("acatante")) {
+				Specification<Atendimento> acatanteSpec = (root, query, cb) ->
+				cb.like(cb.lower(root.join("acatante").get("nome")), filter);
+
+				textoSpec = textoSpec == null?acatanteSpec:textoSpec.or(acatanteSpec);
+			}
+
+			if (campos.contains("voluntario")) {
+				Specification<Atendimento> voluntarioSpec = (root, query, cb) ->
+				cb.like(cb.lower(root.join("voluntario").get("nome")), filter);
+
+				textoSpec = textoSpec == null?voluntarioSpec:textoSpec.or(voluntarioSpec);
+			}
+
+			if (textoSpec != null) {
+				spec = spec.and(textoSpec);
+			}
+		}
+
+		return atendimentoRepository.findAll(spec, pageable).map(this::toResponseDTO);
 	}
 
 	@Override
 	public AtendimentoResponseDTO buscarPorId(String id){
 		return atendimentoRepository.findById(id).map(this::toResponseDTO).orElseThrow(() -> new AtendimentoNaoEncontradoException(id));
 	};
+
+	@Override
+	public Atendimento buscarPorIdAtendimento(String id){
+		return atendimentoRepository.findById(id).orElseThrow(() -> new AtendimentoNaoEncontradoException(id));
+	}
 
 	@Override
 	public AtendimentoResponseDTO criar(AtendimentoRequestDTO dto){

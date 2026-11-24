@@ -12,7 +12,7 @@ import com.example.koina.usuario.model.entity.Usuario;
 import com.example.koina.usuario.model.enums.TipoPapel;
 
 public interface UsuarioService {
-	Page<UsuarioResponseDTO> listarUsuarios(String text, TipoPapel tipoPapel, Pageable pageable);
+	Page<UsuarioResponseDTO> listarUsuarios(String pesquisa, TipoPapel tipoPapel, Pageable pageable);
 
 	UsuarioResponseDTO buscarPorId(String id);
 
