@@ -23,8 +23,8 @@ public class MensagemServiceImpl implements MensagemService{
 	private final ChatServiceImpl chatServiceImpl;
 
 	public MensagemResponseDTO criar(MensagemRequestDTO dto){
-		Usuario usuario = usuarioServiceImpl.buscarPorIdUsuario(dto.idUsuario());
-		Chat chat = chatServiceImpl.buscarPorId
+		// Usuario usuario = usuarioServiceImpl.buscarPorIdUsuario(dto.idUsuario());
+		// Chat chat = chatServiceImpl.buscarPorId(dto.idChat);
 		return null;
 	}
 
